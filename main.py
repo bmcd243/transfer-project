@@ -27,6 +27,38 @@ full_date = datetime.date.today()
 def restart():
 	os.execl(sys.executable, sys.executable, *sys.argv)
 
+def create_database():
+
+	connection = sqlite3.connect('collyers_booking_system.db')
+
+	cursor = connection.cursor()
+
+	customer_table = """CREATE TABLE IF NOT EXISTS
+	customer(
+	customer_id INTEGER PRIMARY KEY,
+	first_name TEXT,
+	last_name TEXT,
+	phone_number TEXT,
+	)"""
+
+booking = """CREATE TABLE IF NOT EXISTS
+	booking(
+	booking_id INTEGER PRIMARY KEY,
+	customer_id INTEGER,
+	date_booked TEXT,
+	cost REEL,
+	)"""
+
+performance_table = """CREATE TABLE IF NOT EXISTS
+	booking(
+	booking_id INTEGER PRIMARY KEY,
+	customer_id INTEGER,
+	date_booked TEXT,
+	cost REEL,
+	)"""
+
+
+
 
 # define self
 class tkinterApp(Tk):
