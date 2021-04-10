@@ -13,16 +13,6 @@ import time
 # import sqlite 3 for database functionality
 import sqlite3
 
-# import datetime module
-import datetime
-
-# fetching dates
-current_date = datetime.datetime.now()
-current_today = current_date.strftime("%w")
-current_month = current_date.strftime("%m")
-current_year = current_date.strftime("%Y")
-full_date = datetime.date.today()
-
 
 def restart():
 	os.execl(sys.executable, sys.executable, *sys.argv)
@@ -41,20 +31,28 @@ def create_database():
 	phone_number TEXT,
 	)"""
 
-booking = """CREATE TABLE IF NOT EXISTS
-	booking(
-	booking_id INTEGER PRIMARY KEY,
-	customer_id INTEGER,
-	date_booked TEXT,
-	cost REEL,
-	)"""
+	booking_table = """CREATE TABLE IF NOT EXISTS
+		booking(
+		booking_id INTEGER PRIMARY KEY,
+		customer_id INTEGER,
+		night INTEGER,
+		cost REAL,
+		FOREIGN KEY (customer_id) REFERENCES customer(customer_id)
+		)"""
 
-performance_table = """CREATE TABLE IF NOT EXISTS
-	booking(
-	booking_id INTEGER PRIMARY KEY,
-	customer_id INTEGER,
-	date_booked TEXT,
-	cost REEL,
+	performance_table = """CREATE TABLE IF NOT EXISTS
+		performance(
+		performance_id INTEGER PRIMARY KEY,
+		seat_id INTEGER,
+		booking_id INTEGER,
+		FOREIGN KEY (seat_id) REFERENCES seat(seat_id)
+		FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
+		)"""
+
+	seat_table = """CREATE TABLE IF NOT EXISTS
+	seat(
+		seat_id INTEGER PRIMARY KEY,
+		type_of_seat TEXT,
 	)"""
 
 
@@ -76,7 +74,7 @@ class tkinterApp(Tk):
 		# initialising frames to an empty array
 		self.frames = {}
 
-		for F in (welcome_frame, new_booking_frame, seat_selection_frame):
+		for F in (welcome_frame, new_booking_frame, edit_booking_frame):
 			page_name = F.__name__
 			frame = F(parent=container, controller=self)
 			self.frames[page_name] = frame
@@ -94,13 +92,13 @@ class welcome_frame(Frame):
 	def __init__(self, parent, controller):
 		Frame.__init__(self, parent)
 		self.controller = controller
-		label = Label(self, text="This is the start page")
+		label = Label(self, text="Hello and welcome to the Booking System - please select one of the buttons below.")
 		label.pack(side="top", fill="x", pady=10)
 
-		button1 = Button(self, text="Go to new booking frame",
+		button1 = Button(self, text="Create new booking",
 							command=lambda: controller.show_frame("new_booking_frame"))
-		button2 = Button(self, text="Go to seat selection frame",
-							command=lambda: controller.show_frame("seat_selection_frame"))
+		button2 = Button(self, text="Edit existing booking",
+							command=lambda: controller.show_frame("edit_booking_frame"))
 		button1.pack()
 		button2.pack()
 
@@ -109,23 +107,25 @@ class new_booking_frame(Frame):
 	def __init__(self, parent, controller):
 		Frame.__init__(self, parent)
 		self.controller = controller
-		label = Label(self, text="This is page 1")
-		label.pack(side="top", fill="x", pady=10)
-		button = Button(self, text="Go to the start page",
+		label = Label(self, text="NEW BOOKING")
+		label.grid(row=1, column=1, pady=10)
+		button = Button(self, text="HOME PAGE",
 						   command=lambda: controller.show_frame("welcome_frame"))
-		button.pack()
+		button.grid(row=0, column=0, pady=10)
 
 
-class seat_selection_frame(Frame):
+class edit_booking_frame(Frame):
 
 	def __init__(self, parent, controller):
 		Frame.__init__(self, parent)
 		self.controller = controller
-		label = Label(self, text="This is page 2")
-		label.pack(side="top", fill="x", pady=10)
-		button = Button(self, text="Go to the start page",
+		label = Label(self, text="🚧 PAGE IN PROGRESS 🚧")
+		label.grid(row=1, column=1, pady=10)
+		button = Button(self, text="HOME PAGE",
 						   command=lambda: controller.show_frame("welcome_frame"))
-		button.pack()
+		button.grid(row=0, column=0)
+
+		print("please work")
 
 
 if __name__ == "__main__":
