@@ -4,6 +4,8 @@ from tkinter import ttk
 import tkinter.font as tkFont
 # from PIL import ImageTk, Image
 from tkcalendar import *
+from tkinter import messagebox
+
 
 # import modules for restart functionality
 import os
@@ -47,8 +49,8 @@ def create_database():
 		performance_id TEXT PRIMARY KEY,
 		seat_id TEXT,
 		booking_id INTEGER,
-		FOREIGN KEY (seat_id) REFERENCES seat(seat_id)
-		FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
+		FOREIGN KEY (seat_id) REFERENCES seat(seat_id),
+		FOREIGN KEY (booking_id) REFERENCES booking(booking_id),
 		)"""
 
 	seat_table = """CREATE TABLE IF NOT EXISTS
@@ -110,24 +112,140 @@ def start():
 	raise_frame(welcome_frame, welcome_frame)
 
 def welcome():
-	Button(welcome_frame, text='Start new booking', command=lambda:raise_frame(welcome_frame, choose_night_frame)).grid(row=1, column=3)
-	Label(welcome_frame, text='Welcome to the Collyers Booking System, please select one of the buttons below.').grid(row=0, column=3)
+	global first_night_availability
+	global second_night_availability
+	global third_night_availability
+
+	Button(welcome_frame, text='Start new booking', command=lambda:raise_frame(welcome_frame, choose_night_frame)).grid(row=1, column=3, pady=10, padx=10)
+	Label(welcome_frame, text='Welcome to the Collyers Booking System, please select one of the buttons below.').grid(row=0, column=3, pady=10, padx=10)
 
 	def fetch_current_dates():
-			connection = sqlite3.connect('collyers_booking_system.db')
-			cursor = connection.cursor()
+		global first_night_availability
+		global second_night_availability
+		global third_night_availability
 
-			first_night = cursor.execute("""SELECT*(booking_id) FROM booking WHERE night=1""")
-			print(first_night)
+		connection = sqlite3.connect('collyers_booking_system.db')
+		cursor = connection.cursor()
 
-	Label(welcome_frame, text='Current availability').grid(row=2, column=3)
+		# FIRST NIGHT
+
+		cursor.execute("""SELECT * FROM booking WHERE night=1""")
+		first_night = cursor.fetchall()
+
+		i=0
+		for row in first_night:
+			i = i + 1		
+		first_night_availability = 200-i
+
+		# SECOND NIGHT
+
+		cursor.execute("""SELECT * FROM booking WHERE night=2""")
+		second_night = cursor.fetchall()
+
+		j=0
+		for row in second_night:
+			j = j + 1		
+		second_night_availability = 200-j
+
+		# THIRD NIGHT
+
+		cursor.execute("""SELECT * FROM booking WHERE night=3""")
+		third_night = cursor.fetchall()
+
+		k=0
+		for row in third_night:
+			k=k+1
+		
+		third_night_availability = 200-k
+
+
+		Label(welcome_frame, text='First night	-->	' + str(first_night_availability) + ' seats avaiable').grid(row=3, column=3, pady=10, padx=10)
+		Label(welcome_frame, text='Second night	-->	' + str(second_night_availability) + ' seats avaiable').grid(row=4, column=3, pady=10, padx=10)				
+		Label(welcome_frame, text='Third night	-->	' + str(third_night_availability) + ' seats avaiable').grid(row=5, column=3, pady=10, padx=10)				
+			
+	
+	fetch_current_dates()
+
+	Label(welcome_frame, text='⬇️CURRENT AVAILABILITY⬇️').grid(row=2, column=3, pady=10, padx=10)
 
 def choose_night():
-	Label(choose_night_frame, text="We are now on the second frame").pack()
-	Button(choose_night_frame, text='Back', command=lambda:raise_frame(choose_night_frame, welcome_frame)).pack()
+	Label(choose_night_frame, text="NEW BOOKING").grid(column=3, row=0, pady=10, padx=10)
+	Button(choose_night_frame, text='Back', command=lambda:raise_frame(choose_night_frame, welcome_frame)).grid(row=0, column=0)
 
-def seat_selection():
-	print("")
+	Label(choose_night_frame, text="⬇️Select a night below⬇️").grid(column=3, row=1, pady=10, padx=10)
+
+	night_options = [
+		"Night one",
+		"Night two",
+		"Night three"
+	]
+
+	variable = StringVar(choose_night_frame)
+	variable.set(night_options[0])
+
+	night_dropdown = OptionMenu(choose_night_frame, variable, *night_options)
+	night_dropdown.grid(row=2, column=3, pady=10, padx=10)
+
+	def confirm_availability():
+		chosen_night = variable.get()
+
+		if chosen_night == "Night one":
+			if first_night_availability < 1:
+				messagebox.showerror(title='Night fully booked', message='This night is fully booked, please select a different night')
+			else:
+				seat_selection(chosen_night)
+
+		if chosen_night == "Night two":
+			if second_night_availability < 1:
+				messagebox.showerror(title='Night fully booked', message='This night is fully booked, please select a different night')
+			else:
+				seat_selection(chosen_night)
+
+		if chosen_night == "Night three":
+			if third_night_availability < 1:
+				messagebox.showerror(title='Night fully booked', message='This night is fully booked, please select a different night')
+			else:
+				seat_selection(chosen_night)
+
+
+	Button(choose_night_frame, text="CONFIRM NIGHT", command=lambda: confirm_availability()).grid(column=3, row=3, pady=10, padx=10)
+
+def seat_selection(chosen_night):
+
+	def check_seat_availability(chosen_night):
+		if chosen_night == "Night one":
+			night_number = 1
+		if chosen_night == "Night two":
+			night_number = 2
+		if chosen_night == "Night three":
+			night_number = 3
+
+		connection = sqlite3.connect('collyers_booking_system.db')
+		cursor = connection.cursor()
+
+		cursor.execute("""SELECT seat_id FROM performance INNER JOIN booking ON night=?""", (night_number))
+		booked_seats = cursor.fetchall()
+
+		print(booked_seats)
+		
+
+	check_seat_availability(chosen_night)
+
+
+	# for i in range(10):
+    # letter = chr(i+97).upper()
+    # row_label = Label(root, text=letter)
+    # row_label.grid(row=i+1, column=0)
+    # for j in range(20):
+    #     column_label = Label(root, text=j+1)
+    #     column_label.grid(row=0, column=j+1)
+    #     # linear search through each position in the 2D list
+    #     if available_seats[i][j] == True:
+    #         button_colour = "green"
+    #     else:
+    #         button_colour = "red"
+    #     b = Button(root, bg=button_colour, height=20, width=50)
+    #     b.grid(row=i + 1, column=j+1)
 
 def enter_details():
 	print("")
@@ -169,7 +287,7 @@ for frame in (welcome_frame, choose_night_frame, seat_selection_frame, enter_det
 	frame.grid(row=0, column=0, sticky='news')
 
 start()
-create_database()
+# create_database()
 
 
 root.geometry("1000x800")
