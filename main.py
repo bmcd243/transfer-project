@@ -13,6 +13,7 @@ import time
 # import sqlite 3 for database functionality
 import sqlite3
 
+root = Tk()
 
 def restart():
 	os.execl(sys.executable, sys.executable, *sys.argv)
@@ -28,12 +29,13 @@ def create_database():
 	customer_id INTEGER PRIMARY KEY,
 	first_name TEXT,
 	last_name TEXT,
-	phone_number TEXT,
+	phone_number INTEGER,
+	type_of_customer TEXT
 	)"""
 
 	booking_table = """CREATE TABLE IF NOT EXISTS
 		booking(
-		booking_id INTEGER PRIMARY KEY,
+		booking_id TEXT PRIMARY KEY,
 		customer_id INTEGER,
 		night INTEGER,
 		cost REAL,
@@ -42,8 +44,8 @@ def create_database():
 
 	performance_table = """CREATE TABLE IF NOT EXISTS
 		performance(
-		performance_id INTEGER PRIMARY KEY,
-		seat_id INTEGER,
+		performance_id TEXT PRIMARY KEY,
+		seat_id TEXT,
 		booking_id INTEGER,
 		FOREIGN KEY (seat_id) REFERENCES seat(seat_id)
 		FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
@@ -51,85 +53,125 @@ def create_database():
 
 	seat_table = """CREATE TABLE IF NOT EXISTS
 	seat(
-		seat_id INTEGER PRIMARY KEY,
-		type_of_seat TEXT,
+		seat_id TEXT PRIMARY KEY,
+		type_of_seat TEXT
 	)"""
 
+	cursor.execute(customer_table)
+	cursor.execute(booking_table)
+	cursor.execute(performance_table)
+	cursor.execute(seat_table)
+
+	customer_default_values = [
+		(1, 'Steve', 'Smith', '07748214857', 'Reduced'),
+		(2, 'Sarah', 'McDonald', '07543997564', 'Reduced'),
+		(3, 'Will', 'Stevenson', '07734294756', 'Normal'),
+		(4, 'Steve', 'Swimswam', '07654384998', 'Normal'),
+		(5, 'Harry', 'Reeto', '07754834768', 'Normal')
+	]
+
+	cursor.executemany("INSERT INTO customer (customer_id, first_name, last_name, phone_number, type_of_customer) VALUES (?, ?, ?, ?, ?)", customer_default_values)
+	connection.commit()
+
+	booking_default_values = [
+		('1-1', 1, 1, 5.00),
+		('2-2', 2, 2, 5.00),
+		('1-3', 3, 1, 10.00),
+		('3-4', 4, 3, 10.00),
+		('2-5', 5, 2, 10.00)
+	]
+
+	cursor.executemany("INSERT INTO booking (booking_id, customer_id, night, cost) VALUES (?, ?, ?, ?)", booking_default_values)
+	connection.commit()
+
+	performance_default_values = [
+		('1-1-B18', 'B18', '1-1'),
+		('2-2-C20', 'C20', '2-2'),
+		('1-3-D12', 'D12', '1-3'),
+		('3-4-E13', 'E13', '3-4'),
+		('2-5-E02', 'E02', '2-5')
+	]
+
+	cursor.executemany("INSERT INTO performance (performance_id, seat_id, booking_id) VALUES (?, ?, ?)", performance_default_values)
+	connection.commit()
+
+	seat_default_values = [
+		('B18', 'Regular'),
+		('C20', 'Regular'),
+		('D12', 'Special'),
+		('E13', 'Regular'),
+		('E02', 'Regular')
+	]
+
+	cursor.executemany("INSERT INTO seat (seat_id, type_of_seat) VALUES (?, ?)", seat_default_values)
+	connection.commit()
+
+def start():
+	raise_frame(welcome_frame, welcome_frame)
+
+def welcome():
+	Button(welcome_frame, text='Start new booking', command=lambda:raise_frame(welcome_frame, choose_night_frame)).grid(row=1, column=3)
+	Label(welcome_frame, text='Welcome to the Collyers Booking System, please select one of the buttons below.').grid(row=0, column=3)
+
+	def fetch_current_dates():
+			connection = sqlite3.connect('collyers_booking_system.db')
+			cursor = connection.cursor()
+
+			first_night = cursor.execute("""SELECT*(booking_id) FROM booking WHERE night=1""")
+			print(first_night)
+
+	Label(welcome_frame, text='Current availability').grid(row=2, column=3)
+
+def choose_night():
+	Label(choose_night_frame, text="We are now on the second frame").pack()
+	Button(choose_night_frame, text='Back', command=lambda:raise_frame(choose_night_frame, welcome_frame)).pack()
+
+def seat_selection():
+	print("")
+
+def enter_details():
+	print("")
+
+def confirmation():
+	print("")
+
+def receipt():
+	print("")
+
+def raise_frame(current_frame, frame):
+	for widget in current_frame.winfo_children():
+		widget.destroy()
+	frame.tkraise()
+	if frame == welcome_frame:
+		welcome()
+	elif frame == choose_night_frame:
+		choose_night()
+	elif frame == seat_selection_frame:
+		seat_selection()
+	elif frame == enter_details_frame:
+		enter_details()
+	elif frame == confirmation_frame:
+		confirmation()
+	elif frame == receipt_frame:
+		receipt()
 
 
 
-# define self
-class tkinterApp(Tk):
-
-	def __init__(self, *args, **kwargs):
-		Tk.__init__(self, *args, **kwargs)
-
-		# creating a container
-		container = Frame(self)
-		container.pack(side="top", fill="both", expand=True)
-
-		container.grid_rowconfigure(0, weight=1)
-		container.grid_columnconfigure(0, weight=1)
-
-		# initialising frames to an empty array
-		self.frames = {}
-
-		for F in (welcome_frame, new_booking_frame, edit_booking_frame):
-			page_name = F.__name__
-			frame = F(parent=container, controller=self)
-			self.frames[page_name] = frame
-
-			frame.grid(row = 0, column = 0, sticky = "nsew")
-
-		self.show_frame("welcome_frame")
-
-	def show_frame(self, page_name):
-		frame = self.frames[page_name]
-		frame.tkraise()
-
-class welcome_frame(Frame):
-
-	def __init__(self, parent, controller):
-		Frame.__init__(self, parent)
-		self.controller = controller
-		label = Label(self, text="Hello and welcome to the Booking System - please select one of the buttons below.")
-		label.pack(side="top", fill="x", pady=10)
-
-		button1 = Button(self, text="Create new booking",
-							command=lambda: controller.show_frame("new_booking_frame"))
-		button2 = Button(self, text="Edit existing booking",
-							command=lambda: controller.show_frame("edit_booking_frame"))
-		button1.pack()
-		button2.pack()
-
-class new_booking_frame(Frame):
-
-	def __init__(self, parent, controller):
-		Frame.__init__(self, parent)
-		self.controller = controller
-		label = Label(self, text="NEW BOOKING")
-		label.grid(row=1, column=1, pady=10)
-		button = Button(self, text="HOME PAGE",
-						   command=lambda: controller.show_frame("welcome_frame"))
-		button.grid(row=0, column=0, pady=10)
+welcome_frame = Frame(root)
+choose_night_frame = Frame(root)
+seat_selection_frame = Frame(root)
+enter_details_frame = Frame(root)
+confirmation_frame = Frame(root)
+receipt_frame = Frame(root)
 
 
-class edit_booking_frame(Frame):
+for frame in (welcome_frame, choose_night_frame, seat_selection_frame, enter_details_frame, confirmation_frame, receipt_frame):
+	frame.grid(row=0, column=0, sticky='news')
 
-	def __init__(self, parent, controller):
-		Frame.__init__(self, parent)
-		self.controller = controller
-		label = Label(self, text="🚧 PAGE IN PROGRESS 🚧")
-		label.grid(row=1, column=1, pady=10)
-		button = Button(self, text="HOME PAGE",
-						   command=lambda: controller.show_frame("welcome_frame"))
-		button.grid(row=0, column=0)
-
-		print("please work")
+start()
+create_database()
 
 
-if __name__ == "__main__":
-	app = tkinterApp()
-	app.geometry("1000x800")
-	app.title("Collyer's Booking System")
-	app.mainloop()
+root.geometry("1000x800")
+root.title("Collyer's Booking System")
+root.mainloop()

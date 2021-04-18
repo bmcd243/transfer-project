@@ -8,27 +8,29 @@ from tkmacosx import Button
 
 root = Tk()
 
-booked_seat = "B2"
+available_seats = [[False, True, True, True, True, False, True, True, True, True, True, True, True, True, True, True, True, True, True, False], [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True], [False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True], [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True], [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True], [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True], [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True], [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True], [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True], [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]]
 
-available_seats = [[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20], [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]]
-
-available_seats_1 = [True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]
-
-# for i in range(10):
-#     for j in range(20):
-#         print(i)
-#         for k in range(10):
-#             if available_seats[i][k] == True:
-#                 button_colour = "red"
-#         b = Button(root, bg=button_colour, height=2, width=5)
-#         b.grid(row=i + 1, column=j)
-
-
-for j in range(20):
-    for k in range(20):
-        if available_seats_1[k] == True:
+for i in range(10):
+    letter = chr(i+97).upper()
+    row_label = Label(root, text=letter)
+    row_label.grid(row=i+1, column=0)
+    for j in range(20):
+        column_label = Label(root, text=j+1)
+        column_label.grid(row=0, column=j+1)
+        # linear search through each position in the 2D list
+        if available_seats[i][j] == True:
             button_colour = "green"
+        else:
+            button_colour = "red"
         b = Button(root, bg=button_colour, height=20, width=50)
-        b.grid(row=1, column=j)
+        b.grid(row=i + 1, column=j+1)
+
+
+# for j in range(20):
+#     for k in range(20):
+#         if available_seats_1[k] == True:
+#             button_colour = "green"
+#         b = Button(root, bg=button_colour, height=20, width=50)
+#         b.grid(row=1, column=j)
 
 root.mainloop()

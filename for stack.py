@@ -18,36 +18,33 @@ class tkinterApp(Tk):
 		# initialising frames to an empty array
 		self.frames = {}
 
-		for F in (welcome_frame, edit_booking_frame):
-			page_name = F.__name__
-			frame = F(parent=container, controller=self)
-			self.frames[page_name] = frame
+		self.frames['welcome_frame'] = welcome_frame(parent=controller, controller=self)
+		self.frames['edit_booking_frame'] = edit_booking_frame(parent=controller, controller=self)
 
-			frame.grid(row = 0, column = 0, sticky = "nsew")
+		frame.grid(row = 0, column = 0, sticky = "nsew")
 
 		self.show_frame("welcome_frame")
 
 	def show_frame(self, page_name):
 		frame = self.frames[page_name]
 		frame.tkraise()
-		frame.event_generate("<<ShowFrame>>")
 
 class welcome_frame(Frame):
 	def __init__(self, parent, controller):
 		Frame.__init__(self, parent)
 		self.controller = controller
 
+		button2 = Button(self,  command=lambda: controller.show_frame("edit_booking_frame"))
+		button2.pack()
+
 
 class edit_booking_frame(Frame):
+
 	def __init__(self, parent, controller):
 		Frame.__init__(self, parent)
 		self.controller = controller
 
-		self.bind("<<ShowFrame>>", self.on_show_frame)
-
-		def on_show_frame(self, event):
-			print("I am being shown...")
-
+		print("hello")
 
 
 if __name__ == "__main__":
