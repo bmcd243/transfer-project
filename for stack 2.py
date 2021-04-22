@@ -1,38 +1,25 @@
-from tkinter import *
-
-def second_frame():
-    label = Label(f2, text="We are now on the second frame")
-    label.pack()
+available_seats = [['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20'], ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B13', 'B14', 'B15', 'B16', 'B17', 'B18', 'B19', 'B20'], ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18', 'C19', 'C20'], ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D13', 'D14', 'D15', 'D16', 'D17', 'D18', 'D19', 'D20'], ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10', 'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18', 'E19', 'E20'], ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15', 'F16', 'F17', 'F18', 'F19', 'F20'], ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10', 'G11', 'G12', 'G13', 'G14', 'G15', 'G16', 'G17', 'G18', 'G19', 'G20'], ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15', 'H16', 'H17', 'H18', 'H19', 'H20'], ['I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'I14', 'I15', 'I16', 'I17', 'I18', 'I19', 'I20'], ['J1', 'J2', 'J3', 'J4', 'J5', 'J6', 'J7', 'J8', 'J9', 'J10', 'J11', 'J12', 'J13', 'J14', 'J15', 'J16', 'J17', 'J18', 'J19', 'J20'] ]
 
 
-def raise_frame(frame):
-    frame.tkraise()
-    if frame == f2:
-        second_frame()
+booked_seats = [('B18',), ('D12',)]
+
+length = len(booked_seats)
+print (length)
+
+booked_seats_converted = []
+
+for i in range(length):
+    converted = list(booked_seats[i])
+    booked_seats_converted.append(converted)
+
+print(booked_seats_converted)
 
 
-root = Tk()
 
-f1 = Frame(root)
-f2 = Frame(root)
-f3 = Frame(root)
-f4 = Frame(root)
-
-for frame in (f1, f2, f3, f4):
-    frame.grid(row=0, column=0, sticky='news')
-
-Button(f1, text='Go to frame 2', command=lambda:raise_frame(f2)).pack()
-Label(f1, text='FRAME 1').pack()
-
-Label(f2, text='FRAME 2').pack()
-Button(f2, text='Go to frame 3', command=lambda:raise_frame(f3)).pack()
-
-Label(f3, text='FRAME 3').pack(side='left')
-Button(f3, text='Go to frame 4', command=lambda:raise_frame(f4)).pack(side='left')
-
-Label(f4, text='FRAME 4').pack()
-Button(f4, text='Goto to frame 1', command=lambda:raise_frame(f1)).pack()
-
-raise_frame(f1)
-root.mainloop()
-
+# for value in booked_seats:
+#     for i in range(10):
+#         for j in range(20):
+#             converted = list(value)
+#             print(converted)
+#             if available_seats[i][j] == converted:
+#                 available_seats[i][j] = 'False'
