@@ -327,53 +327,63 @@ def enter_details():
 
 	Label(enter_details_frame, text='Enter details below').grid(row=0, column=0, padx=5, pady=20)
 
-	Label(enter_details_frame, text='Enter first name -->').grid(row=1, column=0, padx=5, pady=20)
+	Label(enter_details_frame, text='Enter first name ➡️ ').grid(row=1, column=0, padx=5, pady=20)
 
 	enter_first_name = Entry(enter_details_frame)
 	enter_first_name.grid(row=1, column=1, padx=5, pady=20)
 
-	Label(enter_details_frame, text='Enter last name -->').grid(row=2, column=0, padx=5, pady=20)
+	Label(enter_details_frame, text='Enter last name ➡️ ').grid(row=2, column=0, padx=5, pady=20)
 
 	enter_last_name = Entry(enter_details_frame)
 	enter_last_name.grid(row=2, column=1, padx=5, pady=20)
 
-	Label(enter_details_frame, text='Enter phone number -->').grid(row=3, column=0, padx=5, pady=20)
+	Label(enter_details_frame, text='Enter phone number ➡️ ').grid(row=3, column=0, padx=5, pady=20)
+
 
 	enter_phone_number = Entry(enter_details_frame)
 	enter_phone_number.grid(row=3, column=1, padx=5, pady=20)
 
-	dropdown_type_of_customer
+	Label(enter_details_frame, text='Type of customer ➡️ ').grid(row=4, column=0, padx=5, pady=20)
+
+	
+	customer_options = [
+		"Standard (Adult - £10)",
+		"Reduced (Under 18, Concession - £5"
+	]
+
+	variable = StringVar(enter_details_frame)
+	variable.set(customer_options[0])
+
+	type_of_customer_dropdown = OptionMenu(enter_details_frame, variable, *customer_options)
+	type_of_customer_dropdown.grid()
+
+	type_of_customer_dropdown.grid(row=4, column=1, padx=5, pady=20)
 
 	def add_details_to_database(first_name, last_name, phone_number, type_of_customer):
 		
 		connection = sqlite3.connect('collyers_booking_system.db')
 		cursor = connection.cursor()
 
-		cursor.executemany("INSERT INTO customer (first_name, last_name, phone_number, type_of_customer) VALUES (?, ?, ?, ?)", first_name, last_name, phone_number, type_of_customer)
+		cursor.execute("INSERT INTO customer (first_name, last_name, phone_number, type_of_customer) VALUES (?, ?, ?, ?)", (first_name, last_name, phone_number, type_of_customer))
 		connection.commit()
+
+
 
 
 	def fetch_details():
 		first_name = enter_first_name.get()
 		last_name = enter_last_name.get()
 		phone_number = enter_phone_number.get()
-
-		customer_options = [
-			"Standard (Adult - £10)"
-			"Reduced (Under 18, Concession - £5"
-		]
-
-		variable = StringVar(enter_details_frame)
-		variable.set(customer_options[0])
-
-		type_of_customer_dropdown = OptionMenu(enter_details_frame, variable, *customer_options)
-
-
-		add_details_to_database(first_name, last_name, phone_number)
+		type_of_customer = variable.get()
 
 
 
-	Button(enter_details_frame, text='Confirm details', command=lambda: fetch_details())
+
+		add_details_to_database(first_name, last_name, phone_number, type_of_customer)
+
+
+
+	Button(enter_details_frame, text='Confirm details', command=lambda: fetch_details()).grid(row=5, column=1)
 
 def confirmation():
 	print("")
