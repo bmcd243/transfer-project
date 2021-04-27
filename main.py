@@ -29,7 +29,7 @@ def create_database():
 
 	customer_table = """CREATE TABLE IF NOT EXISTS
 	customer(
-	customer_id INTEGER AUTO_INCREMENT,
+	customer_id INTEGER,
 	first_name TEXT,
 	last_name TEXT,
 	phone_number INTEGER,
@@ -217,6 +217,7 @@ def choose_night():
 	Button(choose_night_frame, text="CONFIRM NIGHT", command=lambda: confirm_availability()).grid(column=3, row=3, pady=10, padx=10)
 
 def seat_selection():
+	global selected_seat
 
 	def check_selected_seat(selected_seat, available_seats):
 		print(selected_seat)
@@ -236,6 +237,7 @@ def seat_selection():
 
 
 	def display_seats(available_seats):
+		global selected_seat
 		# for each row
 		for i in range(10):
 			letter = chr(i+97).upper()
@@ -265,6 +267,7 @@ def seat_selection():
 		seat_choose_field.grid(row=13, column=1, padx=5, pady=20, columnspan=10)
 
 		def fetch_entry():
+			global selected_seat
 			selected_seat = seat_choose_field.get()
 
 			check_selected_seat(selected_seat, available_seats)
@@ -324,6 +327,11 @@ def seat_selection():
 
 
 def enter_details():
+	global latest_id
+	global first_name
+	global last_name
+	global phone_number
+	global type_of_customer
 
 	Label(enter_details_frame, text='Enter details below').grid(row=0, column=0, padx=5, pady=20)
 
@@ -348,7 +356,7 @@ def enter_details():
 	
 	customer_options = [
 		"Standard (Adult - £10)",
-		"Reduced (Under 18, Concession - £5"
+		"Reduced (Under 18/Concession - £5"
 	]
 
 	variable = StringVar(enter_details_frame)
@@ -359,34 +367,105 @@ def enter_details():
 
 	type_of_customer_dropdown.grid(row=4, column=1, padx=5, pady=20)
 
-	def add_details_to_database(first_name, last_name, phone_number, type_of_customer):
+	def add_details_to_database(customer_id, first_name, last_name, phone_number, type_of_customer):
 		
 		connection = sqlite3.connect('collyers_booking_system.db')
 		cursor = connection.cursor()
 
-		cursor.execute("INSERT INTO customer (first_name, last_name, phone_number, type_of_customer) VALUES (?, ?, ?, ?)", (first_name, last_name, phone_number, type_of_customer))
+		cursor.execute("INSERT INTO customer (customer_id, first_name, last_name, phone_number, type_of_customer) VALUES (?, ?, ?, ?, ?)", (customer_id, first_name, last_name, phone_number, type_of_customer))
 		connection.commit()
 
+		raise_frame(seat_selection_frame, confirmation_frame)
 
 
 
-	def fetch_details():
+
+	def fetch_details():			
+		global latest_id
+		global first_name
+		global last_name
+		global phone_number
+		global type_of_customer
+
+		def create_customer_id():
+			# shouldn't have this many globals...
+			global latest_id
+			global first_name
+			global last_name
+			global phone_number
+			global type_of_customer
+			connection = sqlite3.connect('collyers_booking_system.db')
+			cursor = connection.cursor()
+
+			latest_id = cursor.execute("""SELECT MAX(customer_id) FROM customer""")
+			connection.commit()
+
+		create_customer_id()
+
+
+		tuple_list = latest_id.fetchall()
+
+		# Returning the tuple as a single value and adding one to it which creates the next customer_id
+
+		for item in tuple_list:
+			customer_id = item[0] + 1
+
 		first_name = enter_first_name.get()
 		last_name = enter_last_name.get()
 		phone_number = enter_phone_number.get()
-		type_of_customer = variable.get()
+		type_of_customer_fetch = variable.get()
 
+		if type_of_customer_fetch == 'Standard (Adult - £10)':
+			type_of_customer = 'Normal'
+		
+		elif type_of_customer_fetch == 'Reduced (Under 18/Concession - £5':
+			type_of_customer = 'Reduced'
+		
+		else:
+			print("We got a problem!")
 
-
-
-		add_details_to_database(first_name, last_name, phone_number, type_of_customer)
+		add_details_to_database(customer_id, first_name, last_name, phone_number, type_of_customer)
 
 
 
 	Button(enter_details_frame, text='Confirm details', command=lambda: fetch_details()).grid(row=5, column=1)
 
 def confirmation():
-	print("")
+
+	def book_performance():
+		connection = sqlite3.connect('collyers_booking_system.db')
+		cursor = connection.cursor()
+
+		def create_booking_id():
+			# Fetch latest booking ID
+			latest_booking_id = cursor.execute("SELECT booking_id FROM booking ORDER BY column DESC LIMIT 1").fetchone()
+			print(latest_booking_id)
+
+			# Return just the first number from the booking ID
+
+
+
+
+		# cursor.execute("INSERT INTO booking (customer_id, first_name, last_name, phone_number, type_of_customer) VALUES (?, ?, ?, ?, ?)", (customer_id, first_name, last_name, phone_number, type_of_customer))
+		# connection.commit()
+
+
+	book_performance()
+
+	Label(confirmation_frame, text='Does this all look correct?').grid(column=0, row=0, pady=5, padx=5)
+
+	Label(confirmation_frame, text='Performance ID ➡️ ').grid(row=1, column=0, padx=5, pady=5)
+	Label(confirmation_frame, text='Booking ID ➡️ ').grid(row=2, column=0, padx=5, pady=5)
+	Label(confirmation_frame, text='Night chosen ➡️ ').grid(row=3, column=0, padx=5, pady=5)
+	Label(confirmation_frame, text='Seat number ➡️ ').grid(row=4, column=0, padx=5, pady=5)
+	Label(confirmation_frame, text='Cost ➡️ ').grid(row=5, column=0, padx=5, pady=5)
+	Label(confirmation_frame, text='Customer ID ➡️ ').grid(row=6, column=0, padx=5, pady=5)
+	Label(confirmation_frame, text='First name ➡️ ').grid(row=7, column=0, padx=5, pady=5)
+	Label(confirmation_frame, text='Last name ➡️ ').grid(row=8, column=0, padx=5, pady=5)
+	Label(confirmation_frame, text='Phone number ➡️ ').grid(row=9, column=0, padx=5, pady=5)
+	Label(confirmation_frame, text='Type of customer ➡️ ').grid(row=10, column=0, padx=5, pady=5)
+
+	Button(confirmation_frame, text='CONFIRM', command=lambda: book_performance())
 
 def receipt():
 	print("")
@@ -395,6 +474,7 @@ def raise_frame(current_frame, frame):
 	for widget in current_frame.winfo_children():
 		widget.destroy()
 	frame.tkraise()
+	
 	if frame == welcome_frame:
 		welcome()
 	elif frame == choose_night_frame:
