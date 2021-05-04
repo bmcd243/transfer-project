@@ -51,8 +51,10 @@ def create_database():
 		performance_id TEXT PRIMARY KEY,
 		seat_id TEXT,
 		booking_id INTEGER,
+		night INTEGER,
 		FOREIGN KEY (seat_id) REFERENCES seat(seat_id),
 		FOREIGN KEY (booking_id) REFERENCES booking(booking_id)
+		FOREIGN KEY (night) REFERENCES booking_table(night)
 		)"""
 
 	seat_table = """CREATE TABLE IF NOT EXISTS
@@ -89,14 +91,14 @@ def create_database():
 	connection.commit()
 
 	performance_default_values = [
-		('1-1-B18', 'B18', '1-1'),
-		('2-2-C20', 'C20', '2-2'),
-		('1-3-D12', 'D12', '1-3'),
-		('3-4-E13', 'E13', '3-4'),
-		('2-5-E02', 'E02', '2-5')
+		('1-1-B18', 'B18', '1-1', 1),
+		('2-2-C20', 'C20', '2-2', 2),
+		('1-3-D12', 'D12', '1-3', 1),
+		('3-4-E13', 'E13', '3-4', 3),
+		('2-5-E2', 'E2', '2-5', 2)
 	]
 
-	cursor.executemany("INSERT INTO performance (performance_id, seat_id, booking_id) VALUES (?, ?, ?)", performance_default_values)
+	cursor.executemany("INSERT INTO performance (performance_id, seat_id, booking_id, night) VALUES (?, ?, ?, ?)", performance_default_values)
 	connection.commit()
 
 	seat_default_values = [
@@ -104,7 +106,7 @@ def create_database():
 		('C20', 'Regular'),
 		('D12', 'Special'),
 		('E13', 'Regular'),
-		('E02', 'Regular')
+		('E2', 'Regular')
 	]
 
 	cursor.executemany("INSERT INTO seat (seat_id, type_of_seat) VALUES (?, ?)", seat_default_values)
@@ -218,6 +220,9 @@ def choose_night():
 
 def seat_selection():
 	global selected_seat
+	global night_number
+
+	Button(seat_selection_frame, text='Back', command=lambda:raise_frame(seat_selection_frame, choose_night_frame)).grid(row=0, column=0)
 
 	def check_selected_seat(selected_seat, available_seats):
 		print(selected_seat)
@@ -276,6 +281,7 @@ def seat_selection():
 		seat_select.grid(row=14, column=0, padx=5, pady=20, columnspan=10)
 
 	def check_seat_availability(chosen_night):
+		global night_number
 		if chosen_night == "Night one":
 			night_number = 1
 		if chosen_night == "Night two":
@@ -288,19 +294,36 @@ def seat_selection():
 
 		# cursor.execute("""SELECT seat_id FROM performance WHERE booking_id IN (SELECT * FROM booking WHERE night = ?)""", (night_number,))
 
-		sql = """
-		SELECT p.seat_id 
-		FROM performance p INNER JOIN booking b 
-		ON b.booking_id = p. booking_id
-		WHERE b.night=?
-		"""
-		cursor.execute(sql, (night_number,))
+		# sql = """
+		# SELECT p.seat_id 
+		# FROM performance p INNER JOIN performance b 
+		# ON b.performance_id = p.performance_id
+		# WHERE b.night=?
+		# """
+		# cursor.execute(sql, (night_number,))
+
+		print(night_number)
+
+		statement = cursor.execute("""SELECT seat_id FROM performance WHERE night = ?""", (night_number,))
+
 
 		booked_seats = cursor.fetchall()
+		print(booked_seats)
 
 		# array for all seats
 
-		available_seats = [['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20'], ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B13', 'B14', 'B15', 'B16', 'B17', 'B18', 'B19', 'B20'], ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18', 'C19', 'C20'], ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D13', 'D14', 'D15', 'D16', 'D17', 'D18', 'D19', 'D20'], ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10', 'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18', 'E19', 'E20'], ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15', 'F16', 'F17', 'F18', 'F19', 'F20'], ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10', 'G11', 'G12', 'G13', 'G14', 'G15', 'G16', 'G17', 'G18', 'G19', 'G20'], ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15', 'H16', 'H17', 'H18', 'H19', 'H20'], ['I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'I14', 'I15', 'I16', 'I17', 'I18', 'I19', 'I20'], ['J1', 'J2', 'J3', 'J4', 'J5', 'J6', 'J7', 'J8', 'J9', 'J10', 'J11', 'J12', 'J13', 'J14', 'J15', 'J16', 'J17', 'J18', 'J19', 'J20'] ]
+		available_seats_1 = [['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20'], ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B13', 'B14', 'B15', 'B16', 'B17', 'B18', 'B19', 'B20'], ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18', 'C19', 'C20'], ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D13', 'D14', 'D15', 'D16', 'D17', 'D18', 'D19', 'D20'], ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10', 'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18', 'E19', 'E20'], ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15', 'F16', 'F17', 'F18', 'F19', 'F20'], ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10', 'G11', 'G12', 'G13', 'G14', 'G15', 'G16', 'G17', 'G18', 'G19', 'G20'], ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15', 'H16', 'H17', 'H18', 'H19', 'H20'], ['I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'I14', 'I15', 'I16', 'I17', 'I18', 'I19', 'I20'], ['J1', 'J2', 'J3', 'J4', 'J5', 'J6', 'J7', 'J8', 'J9', 'J10', 'J11', 'J12', 'J13', 'J14', 'J15', 'J16', 'J17', 'J18', 'J19', 'J20']]
+		available_seats_2 = [['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20'], ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B13', 'B14', 'B15', 'B16', 'B17', 'B18', 'B19', 'B20'], ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18', 'C19', 'C20'], ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D13', 'D14', 'D15', 'D16', 'D17', 'D18', 'D19', 'D20'], ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10', 'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18', 'E19', 'E20'], ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15', 'F16', 'F17', 'F18', 'F19', 'F20'], ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10', 'G11', 'G12', 'G13', 'G14', 'G15', 'G16', 'G17', 'G18', 'G19', 'G20'], ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15', 'H16', 'H17', 'H18', 'H19', 'H20'], ['I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'I14', 'I15', 'I16', 'I17', 'I18', 'I19', 'I20'], ['J1', 'J2', 'J3', 'J4', 'J5', 'J6', 'J7', 'J8', 'J9', 'J10', 'J11', 'J12', 'J13', 'J14', 'J15', 'J16', 'J17', 'J18', 'J19', 'J20']]
+		available_seats_3 = [['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8', 'A9', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17', 'A18', 'A19', 'A20'], ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10', 'B11', 'B12', 'B13', 'B14', 'B15', 'B16', 'B17', 'B18', 'B19', 'B20'], ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11', 'C12', 'C13', 'C14', 'C15', 'C16', 'C17', 'C18', 'C19', 'C20'], ['D1', 'D2', 'D3', 'D4', 'D5', 'D6', 'D7', 'D8', 'D9', 'D10', 'D11', 'D12', 'D13', 'D14', 'D15', 'D16', 'D17', 'D18', 'D19', 'D20'], ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10', 'E11', 'E12', 'E13', 'E14', 'E15', 'E16', 'E17', 'E18', 'E19', 'E20'], ['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'F13', 'F14', 'F15', 'F16', 'F17', 'F18', 'F19', 'F20'], ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'G7', 'G8', 'G9', 'G10', 'G11', 'G12', 'G13', 'G14', 'G15', 'G16', 'G17', 'G18', 'G19', 'G20'], ['H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'H7', 'H8', 'H9', 'H10', 'H11', 'H12', 'H13', 'H14', 'H15', 'H16', 'H17', 'H18', 'H19', 'H20'], ['I1', 'I2', 'I3', 'I4', 'I5', 'I6', 'I7', 'I8', 'I9', 'I10', 'I11', 'I12', 'I13', 'I14', 'I15', 'I16', 'I17', 'I18', 'I19', 'I20'], ['J1', 'J2', 'J3', 'J4', 'J5', 'J6', 'J7', 'J8', 'J9', 'J10', 'J11', 'J12', 'J13', 'J14', 'J15', 'J16', 'J17', 'J18', 'J19', 'J20']]
+
+		if night_number == 1:
+			available_seats = available_seats_1
+		elif night_number == 2:
+			available_seats = available_seats_2
+		elif night_number == 3:
+			available_seats = available_seats_3
+		else:
+			print("We have a problem")
 
 		print(booked_seats)
 
@@ -332,8 +355,11 @@ def enter_details():
 	global last_name
 	global phone_number
 	global type_of_customer
+	global customer_id
 
-	Label(enter_details_frame, text='Enter details below').grid(row=0, column=0, padx=5, pady=20)
+	Button(enter_details_frame, text='Back', command=lambda:raise_frame(enter_details_frame, seat_selection_frame)).grid(row=0, column=0)
+
+	Label(enter_details_frame, text='Enter details below').grid(row=0, column=1, padx=5, pady=20)
 
 	Label(enter_details_frame, text='Enter first name ➡️ ').grid(row=1, column=0, padx=5, pady=20)
 
@@ -386,6 +412,7 @@ def enter_details():
 		global last_name
 		global phone_number
 		global type_of_customer
+		global customer_id
 
 		def create_customer_id():
 			# shouldn't have this many globals...
@@ -431,30 +458,105 @@ def enter_details():
 	Button(enter_details_frame, text='Confirm details', command=lambda: fetch_details()).grid(row=5, column=1)
 
 def confirmation():
+	global new_booking_id
+	global cost
+
+	Button(confirmation_frame, text='Back', command=lambda:raise_frame(confirmation_frame, enter_details_frame)).grid(row=0, column=0)
 
 	def book_performance():
+		global cost
+		global new_booking_id
 		connection = sqlite3.connect('collyers_booking_system.db')
 		cursor = connection.cursor()
 
+		def insert_booking_values(booking_id, customer_id, chosen_night, cost, selected_seat):
+
+			cursor.execute("INSERT INTO booking (booking_id, customer_id, night, cost) VALUES (?, ?, ?, ?)", (booking_id, customer_id, chosen_night, cost))
+			connection.commit()
+
+			if selected_seat[0] == 'D':
+				type_of_seat = 'Special'
+			else:
+				type_of_seat = 'Regular'
+
+			print(selected_seat)
+			print(type_of_seat)
+
+
+			performance_id = booking_id + '-' + selected_seat
+			
+
+			cursor.execute("""INSERT INTO performance (performance_id, seat_id, booking_id, night) VALUES (?, ? ,?, ?)""", (performance_id, selected_seat, booking_id, chosen_night))
+			connection.commit()
+
+			messagebox.showinfo(title='Success', message='All details have been successfully inserted into the database - you may now to proceed to the final screen for a receipt.')
+
+			Button(confirmation_frame, text='Show receipt', command = lambda: raise_frame(confirmation_frame, receipt_frame))
+
 		def create_booking_id():
+			global new_booking_id
+			global cost
 			# Fetch latest booking ID
-			latest_booking_id = cursor.execute("SELECT booking_id FROM booking ORDER BY column DESC LIMIT 1").fetchone()
-			print(latest_booking_id)
+			number_of__booking_rows = cursor.execute('SELECT * FROM booking')
+			booking_results = cursor.fetchall()
+			booking_position = len(booking_results)
+			number_of_customer_rows = cursor.execute('SELECT * FROM customer')
+			customer_results = cursor.fetchall()
+			customer_position = len(customer_results)
+			sql = cursor.execute("""SELECT (booking_id) FROM booking WHERE rowid=?""", (booking_position,))
+			latest_booking_id = sql.fetchall()
+
+			# Returning the first position of the tuple
+
+			for item in latest_booking_id:
+				latest_booking_id = item[0]
+
+			# Adding one to the previous booking_id
+
+			splitter = latest_booking_id.split('-')[0]
+			booking_id_coeff = int(splitter) + 1
+			print (booking_id_coeff)
+
+			# Create new_booking_id
+
+			new_booking_id = str(booking_id_coeff) + '-' + str(customer_id)
+
+
+			# calculating cost
+			cursor.execute("""SELECT (type_of_customer) FROM customer WHERE customer_id=?""", (customer_position,))
+			type_of_customer = cursor.fetchall()
+			
+			for item in type_of_customer:
+				type_of_customer = item[0]
+
+			print("start")
+
+			print(type_of_customer)
+			print (customer_position)
+
+			print("end")
+
+			cost = 0.00
+
+			if type_of_customer == "Normal":
+				cost = 10.00
+			elif type_of_customer == "Reduced":
+				cost = 5.00
+			else:
+				print("We got a problem")
+
+			print(cost)
+
+			insert_booking_values(new_booking_id, customer_id, night_number, cost, selected_seat)
+
+		create_booking_id()
 
 			# Return just the first number from the booking ID
 
-
-
-
-		# cursor.execute("INSERT INTO booking (customer_id, first_name, last_name, phone_number, type_of_customer) VALUES (?, ?, ?, ?, ?)", (customer_id, first_name, last_name, phone_number, type_of_customer))
-		# connection.commit()
-
-
 	book_performance()
 
-	Label(confirmation_frame, text='Does this all look correct?').grid(column=0, row=0, pady=5, padx=5)
+	Label(confirmation_frame, text='⬇️ Does this all look correct? ⬇️').grid(column=1, row=0, pady=5, padx=5)
 
-	Label(confirmation_frame, text='Performance ID ➡️ ').grid(row=1, column=0, padx=5, pady=5)
 	Label(confirmation_frame, text='Booking ID ➡️ ').grid(row=2, column=0, padx=5, pady=5)
 	Label(confirmation_frame, text='Night chosen ➡️ ').grid(row=3, column=0, padx=5, pady=5)
 	Label(confirmation_frame, text='Seat number ➡️ ').grid(row=4, column=0, padx=5, pady=5)
@@ -465,10 +567,45 @@ def confirmation():
 	Label(confirmation_frame, text='Phone number ➡️ ').grid(row=9, column=0, padx=5, pady=5)
 	Label(confirmation_frame, text='Type of customer ➡️ ').grid(row=10, column=0, padx=5, pady=5)
 
-	Button(confirmation_frame, text='CONFIRM', command=lambda: book_performance())
+	Label(confirmation_frame, text=new_booking_id).grid(row=2, column=1, padx=5, pady=5)
+	Label(confirmation_frame, text=chosen_night).grid(row=3, column=1, padx=5, pady=5)
+	Label(confirmation_frame, text=selected_seat).grid(row=4, column=1, padx=5, pady=5)
+	Label(confirmation_frame, text=cost).grid(row=5, column=1, padx=5, pady=5)
+	Label(confirmation_frame, text=customer_id).grid(row=6, column=1, padx=5, pady=5)
+	Label(confirmation_frame, text=first_name).grid(row=7, column=1, padx=5, pady=5)
+	Label(confirmation_frame, text=last_name).grid(row=8, column=1, padx=5, pady=5)
+	Label(confirmation_frame, text=phone_number).grid(row=9, column=1, padx=5, pady=5)
+	Label(confirmation_frame, text=type_of_customer).grid(row=10, column=1, padx=5, pady=5)
+
+	Button(confirmation_frame, text='CONFIRM', command=lambda: book_performance()).grid(row=11, column=0, padx=5, pady=5)
 
 def receipt():
-	print("")
+	Button(choose_night_frame, text='Back', command=lambda:raise_frame(receipt_frame, confirmation_frame)).grid(row=0, column=0)
+
+	Label(confirmation_frame, text='⬇️ Booking complete - here is your receipt ⬇️').grid(column=1, row=0, pady=5, padx=5)
+
+	Label(receipt_frame, text='Performance ID ➡️ ').grid(row=1, column=0, padx=5, pady=5)
+	Label(receipt_frame, text='Booking ID ➡️ ').grid(row=2, column=0, padx=5, pady=5)
+	Label(receipt_frame, text='Night chosen ➡️ ').grid(row=3, column=0, padx=5, pady=5)
+	Label(receipt_frame, text='Seat number ➡️ ').grid(row=4, column=0, padx=5, pady=5)
+	Label(receipt_frame, text='Cost ➡️ ').grid(row=5, column=0, padx=5, pady=5)
+	Label(receipt_frame, text='Customer ID ➡️ ').grid(row=6, column=0, padx=5, pady=5)
+	Label(receipt_frame, text='First name ➡️ ').grid(row=7, column=0, padx=5, pady=5)
+	Label(receipt_frame, text='Last name ➡️ ').grid(row=8, column=0, padx=5, pady=5)
+	Label(receipt_frame, text='Phone number ➡️ ').grid(row=9, column=0, padx=5, pady=5)
+	Label(receipt_frame, text='Type of customer ➡️ ').grid(row=10, column=0, padx=5, pady=5)
+
+	Label(receipt_frame, text=new_booking_id).grid(row=2, column=0, padx=5, pady=5)
+	Label(receipt_frame, text=chosen_night).grid(row=3, column=0, padx=5, pady=5)
+	Label(receipt_frame, text=selected_seat).grid(row=4, column=0, padx=5, pady=5)
+	Label(receipt_frame, text=cost).grid(row=5, column=0, padx=5, pady=5)
+	Label(receipt_frame, text=customer_id).grid(row=6, column=0, padx=5, pady=5)
+	Label(receipt_frame, text=first_name).grid(row=7, column=0, padx=5, pady=5)
+	Label(receipt_frame, text=last_name).grid(row=8, column=0, padx=5, pady=5)
+	Label(receipt_frame, text=phone_number).grid(row=9, column=0, padx=5, pady=5)
+	Label(receipt_frame, text=type_of_customer).grid(row=10, column=0, padx=5, pady=5)
+
+	Button(receipt_frame, text='Return to main menu', command=lambda: raise_frame(confirmation_frame, welcome_frame))
 
 def raise_frame(current_frame, frame):
 	for widget in current_frame.winfo_children():
