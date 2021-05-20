@@ -3,7 +3,7 @@ from tkinter import *
 from tkinter import ttk
 import tkinter.font as tkFont
 # from PIL import ImageTk, Image
-from tkcalendar import *
+# from tkcalendar import *
 from tkinter import messagebox
 from tkmacosx import Button
 
@@ -20,6 +20,7 @@ root = Tk()
 
 def restart():
 	os.execl(sys.executable, sys.executable, *sys.argv)
+	raise_frame(confirmation_frame, welcome_frame)
 
 def create_database():
 
@@ -359,7 +360,7 @@ def enter_details():
 
 	Button(enter_details_frame, text='Back', command=lambda:raise_frame(enter_details_frame, seat_selection_frame)).grid(row=0, column=0)
 
-	Label(enter_details_frame, text='Enter details below').grid(row=0, column=1, padx=5, pady=20)
+	Label(enter_details_frame, text='⬇️ Enter details below for seat ' + str(selected_seat) + ' on night ' + str(night_number) + ' ⬇️').grid(row=0, column=1, padx=5, pady=20)
 
 	Label(enter_details_frame, text='Enter first name ➡️ ').grid(row=1, column=0, padx=5, pady=20)
 
@@ -460,16 +461,19 @@ def enter_details():
 def confirmation():
 	global new_booking_id
 	global cost
+	global performance_id
 
 	Button(confirmation_frame, text='Back', command=lambda:raise_frame(confirmation_frame, enter_details_frame)).grid(row=0, column=0)
 
 	def book_performance():
 		global cost
 		global new_booking_id
+		global performance_id
 		connection = sqlite3.connect('collyers_booking_system.db')
 		cursor = connection.cursor()
 
 		def insert_booking_values(booking_id, customer_id, chosen_night, cost, selected_seat):
+			global performance_id
 
 			cursor.execute("INSERT INTO booking (booking_id, customer_id, night, cost) VALUES (?, ?, ?, ?)", (booking_id, customer_id, chosen_night, cost))
 			connection.commit()
@@ -491,7 +495,7 @@ def confirmation():
 
 			messagebox.showinfo(title='Success', message='All details have been successfully inserted into the database - you may now to proceed to the final screen for a receipt.')
 
-			Button(confirmation_frame, text='Show receipt', command = lambda: raise_frame(confirmation_frame, receipt_frame))
+			Button(confirmation_frame, text='Show receipt', command = lambda: raise_frame(confirmation_frame, receipt_frame)).grid(row=12, column=1, padx=5, pady=5)
 
 		def create_booking_id():
 			global new_booking_id
@@ -555,7 +559,7 @@ def confirmation():
 
 	book_performance()
 
-	Label(confirmation_frame, text='⬇️ Does this all look correct? ⬇️').grid(column=1, row=0, pady=5, padx=5)
+	Label(confirmation_frame, text='⬇️ Does this all look correct? ⬇️ - press CONFIRM to insert into the database, then "show receipt"').grid(column=1, row=0, pady=5, padx=5)
 
 	Label(confirmation_frame, text='Booking ID ➡️ ').grid(row=2, column=0, padx=5, pady=5)
 	Label(confirmation_frame, text='Night chosen ➡️ ').grid(row=3, column=0, padx=5, pady=5)
@@ -580,9 +584,9 @@ def confirmation():
 	Button(confirmation_frame, text='CONFIRM', command=lambda: book_performance()).grid(row=11, column=0, padx=5, pady=5)
 
 def receipt():
-	Button(choose_night_frame, text='Back', command=lambda:raise_frame(receipt_frame, confirmation_frame)).grid(row=0, column=0)
+	Button(receipt_frame, text='Back', command=lambda:raise_frame(receipt_frame, confirmation_frame)).grid(row=0, column=0)
 
-	Label(confirmation_frame, text='⬇️ Booking complete - here is your receipt ⬇️').grid(column=1, row=0, pady=5, padx=5)
+	Label(receipt_frame, text='⬇️ Booking complete - here is your receipt ⬇️').grid(column=1, row=0, pady=5, padx=5)
 
 	Label(receipt_frame, text='Performance ID ➡️ ').grid(row=1, column=0, padx=5, pady=5)
 	Label(receipt_frame, text='Booking ID ➡️ ').grid(row=2, column=0, padx=5, pady=5)
@@ -595,17 +599,19 @@ def receipt():
 	Label(receipt_frame, text='Phone number ➡️ ').grid(row=9, column=0, padx=5, pady=5)
 	Label(receipt_frame, text='Type of customer ➡️ ').grid(row=10, column=0, padx=5, pady=5)
 
-	Label(receipt_frame, text=new_booking_id).grid(row=2, column=0, padx=5, pady=5)
-	Label(receipt_frame, text=chosen_night).grid(row=3, column=0, padx=5, pady=5)
-	Label(receipt_frame, text=selected_seat).grid(row=4, column=0, padx=5, pady=5)
-	Label(receipt_frame, text=cost).grid(row=5, column=0, padx=5, pady=5)
-	Label(receipt_frame, text=customer_id).grid(row=6, column=0, padx=5, pady=5)
-	Label(receipt_frame, text=first_name).grid(row=7, column=0, padx=5, pady=5)
-	Label(receipt_frame, text=last_name).grid(row=8, column=0, padx=5, pady=5)
-	Label(receipt_frame, text=phone_number).grid(row=9, column=0, padx=5, pady=5)
-	Label(receipt_frame, text=type_of_customer).grid(row=10, column=0, padx=5, pady=5)
 
-	Button(receipt_frame, text='Return to main menu', command=lambda: raise_frame(confirmation_frame, welcome_frame))
+	Label(receipt_frame, text=performance_id).grid(row=1, column=1, padx=5, pady=5)
+	Label(receipt_frame, text=new_booking_id).grid(row=2, column=1, padx=5, pady=5)
+	Label(receipt_frame, text=chosen_night).grid(row=3, column=1, padx=5, pady=5)
+	Label(receipt_frame, text=selected_seat).grid(row=4, column=1, padx=5, pady=5)
+	Label(receipt_frame, text=cost).grid(row=5, column=1, padx=5, pady=5)
+	Label(receipt_frame, text=customer_id).grid(row=6, column=1, padx=5, pady=5)
+	Label(receipt_frame, text=first_name).grid(row=7, column=1, padx=5, pady=5)
+	Label(receipt_frame, text=last_name).grid(row=8, column=1, padx=5, pady=5)
+	Label(receipt_frame, text=phone_number).grid(row=9, column=1, padx=5, pady=5)
+	Label(receipt_frame, text=type_of_customer).grid(row=10, column=1, padx=5, pady=5)
+
+	Button(receipt_frame, text='Return to main menu', command=lambda: restart()).grid(row=11, column=1, padx=5, pady=5)
 
 def raise_frame(current_frame, frame):
 	for widget in current_frame.winfo_children():
